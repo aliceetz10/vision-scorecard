@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
+<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-2xl font-semibold leading-6 text-gray-900">Project Overview</h1>
+            <p class="mt-2 text-sm text-gray-700">Click a field card to see its full analysis.</p>
+        </div>
+    </div>
+
+    <!-- Card Grid -->
+    <div id="card-grid">
+        {% for row in rows %}
+        <div class="field-card" data-field="{{ row.field | e }}" data-analysis="{{ row.analysis | e }}">
+            <h3>{{ row.field }}</h3>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Employment Factor Section -->
+    <section class="mt-10">
+        <div class="sm:flex sm:items-center mb-4">
+            <div class="sm:flex-auto">
+                <h2 class="text-xl font-semibold text-gray-900">Individual Factors</h2>
+                <p class="mt-1 text-sm text-gray-500">Latest factors affecting waterloo.</p>
+            </div>
+        </div>
+
+        <!-- Single clickable Employment card -->
+        <div class="field-card employment-summary-card" id="employment-card">
+            <div class="employment-card-inner">
+                <span class="employment-card-icon">💼</span>
+                <h3>Employment</h3>
+            </div>
+        </div>
+
+        <!-- Hidden data for JS -->
+        <script id="employment-data" type="application/json">
+                {
+                    "employment": [{% for row in employment %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "type": "employment"}{% if not loop.last %},{% endif %}{% endfor %}],
+                    "unemployment": [{% for row in unemployment %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "type": "unemployment"}{% if not loop.last %},{% endif %}{% endfor %}]
+                }
+            </script>
+    </section>
+</main>
+
+
+<!-- Overlay Modal (generic) -->
+<div id="card-overlay" role="dialog" aria-modal="true">
+    <div id="card-modal">
+        <button id="close-btn" aria-label="Close">✕</button>
+        <h2 id="modal-title"></h2>
+        <p id="modal-analysis"></p>
+    </div>
+</div>
+
+<!-- Employment Modal -->
+<div id="employment-overlay" role="dialog" aria-modal="true">
+    <div id="employment-modal">
+        <button id="employment-close-btn" aria-label="Close">✕</button>
+        <h2 id="employment-modal-title">💼 Employment Analysis</h2>
+        <div id="employment-modal-body"></div>
+        <br>
+        <h2 id="employment-modal-title">📉 Unemployment Analysis</h2>
+        <div id="unemployment-modal-body"></div>
+    </div>
+</div>
+
+<script>
+    // ── Generic card modal ──
+    const overlay = document.getElementById('card-overlay');
+    const titleEl = document.getElementById('modal-title');
+    const analysisEl = document.getElementById('modal-analysis');
+    const closeBtn = document.getElementById('close-btn');
+
+    function openCard(field, analysis) {
+        titleEl.textContent = field;
+        analysisEl.textContent = analysis;
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCard() {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    // Attach generic modal to all field-cards EXCEPT the employment summary card
+    document.querySelectorAll('.field-card:not(#employment-card)').forEach(card => {
+        card.addEventListener('click', () => {
+            openCard(card.dataset.field, card.dataset.analysis);
+        });
+    });
+
+    closeBtn.addEventListener('click', closeCard);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeCard(); });
+
+    // ── Employment modal ──
+    const empOverlay = document.getElementById('employment-overlay');
+    const empBody = document.getElementById('employment-modal-body');
+    const empCloseBtn = document.getElementById('employment-close-btn');
+    const empData = JSON.parse(document.getElementById('employment-data').textContent);
+
+    const unempBody = document.getElementById('unemployment-modal-body');
+
+    function renderRows(rows, container, kind) {
+        container.innerHTML = '';
+        if (rows.length === 0) {
+            container.innerHTML = '<p class="emp-empty">No data available.</p>';
+            return;
+        }
+        rows.forEach(row => {
+            const block = document.createElement('div');
+            block.className = 'emp-analysis-block';
+
+            const text = document.createElement('p');
+            text.className = 'emp-analysis-text';
+            text.textContent = row.analysis || '—';
+
+            const badge = document.createElement('span');
+            badge.className = 'emp-status-badge emp-status-badge--' + kind;
+            badge.textContent = (kind === 'employment' ? '💼 ' : '📉 ') + row.status;
+
+            block.appendChild(text);
+            block.appendChild(badge);
+            container.appendChild(block);
+        });
+    }
+
+    function openEmploymentModal() {
+        renderRows(empData.employment, empBody, 'employment');
+        renderRows(empData.unemployment, unempBody, 'unemployment');
+        empOverlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeEmploymentModal() {
+        empOverlay.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('employment-card').addEventListener('click', openEmploymentModal);
+    empCloseBtn.addEventListener('click', closeEmploymentModal);
+    empOverlay.addEventListener('click', (e) => { if (e.target === empOverlay) closeEmploymentModal(); });
+
+    // Close on Escape key (both modals)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { closeCard(); closeEmploymentModal(); }
+    });
+</script>
+{% endblock %}

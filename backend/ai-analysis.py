@@ -38,12 +38,12 @@ agent = create_sql_agent(
 )
 print("   ✅ Agent ready!")
 
-# 5. Question
+# 5. Questions for AI
 print("\n" + "=" * 60)
-print("❓ QUESTION FOR AI:")
+print("❓ QUESTIONS FOR AI:")
 print("=" * 60)
 
-question = """
+unemployment_question = """
 Analyze the unemployment data for Kitchener-Cambridge-Waterloo.
 Answer:
 1. What is the current unemployment rate and trend?
@@ -53,18 +53,22 @@ Answer:
 Keep it concise (4-6 sentences).
 """
 
-print(question)
-print("\n🧠 AI IS THINKING...")
-print("-" * 60)
+employment_question = """
+Analyze the employment data for Kitchener-Cambridge-Waterloo.
+Answer:
+1. What is the current employment rate and trend?
+2. What does this mean for the region's readiness for growth?
+3. One actionable recommendation.
 
-# 6. Run agent
-response = agent.run(question)
+Keep it concise (4-6 sentences).
+"""
 
-print("\n" + "=" * 60)
-print("📊 AI ANALYSIS RESULT")
-print("=" * 60)
-print(response)
-print("=" * 60)
+# 6. Run agent for both
+print("\n🧠 AI IS ANALYZING UNEMPLOYMENT...")
+unemployment_analysis = agent.run(unemployment_question)
+
+print("\n🧠 AI IS ANALYZING EMPLOYMENT...")
+employment_analysis = agent.run(employment_question)
 
 # 7. Save to overview.db
 print("\n💾 Step 5: Saving to overview.db...")
@@ -73,14 +77,36 @@ overview_db = 'frontend/overview.db'
 conn = sqlite3.connect(overview_db)
 cursor = conn.cursor()
 
+# Get latest values for status
+def get_latest_rate(table_name):
+    metrics_conn = sqlite3.connect('backend/database/metrics.db')
+    metrics_cursor = metrics_conn.cursor()
+    metrics_cursor.execute(f"SELECT rate, month FROM {table_name} ORDER BY date DESC LIMIT 1")
+    row = metrics_cursor.fetchone()
+    metrics_conn.close()
+    return f"{row[1]}: {row[0]}%" if row else "Unknown"
+
+unemployment_status = f"Unemployment Rate: {get_latest_rate('unemployment')}"
+employment_status = f"Employment Rate: {get_latest_rate('employment')}"
+
+# Clear old entries in employment table if desired (optional)
+cursor.execute("DELETE FROM employment")
+
+# Insert Unemployment analysis (is_employment = 0)
 cursor.execute("""
-    INSERT INTO overview (field, analysis) 
-    VALUES (?, ?)
-""", ('🤖 LangChain AI - Unemployment Analysis', response))
+    INSERT INTO employment (status, analysis, is_employment) 
+    VALUES (?, ?, ?)
+""", (unemployment_status, unemployment_analysis, 0))
+
+# Insert Employment analysis (is_employment = 1)
+cursor.execute("""
+    INSERT INTO employment (status, analysis, is_employment) 
+    VALUES (?, ?, ?)
+""", (employment_status, employment_analysis, 1))
 
 conn.commit()
 conn.close()
-print("   ✅ Saved to overview.db!")
+print("   ✅ Saved to overview.db 'employment' table!")
 
 print("\n" + "=" * 60)
 print("🎉 COMPLETE! Refresh your frontend to see the AI insight!")

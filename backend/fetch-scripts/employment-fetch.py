@@ -1,8 +1,25 @@
 import pandas as pd
 import re
+import sqlite3
+
+# Connect to metrics.db
+metrics_db_path = 'backend/database/metrics.db'
+conn = sqlite3.connect(metrics_db_path)
+cursor = conn.cursor()
+
+# Create employment table if it doesn't exist
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS employment (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        city TEXT NOT NULL,
+        date TEXT NOT NULL,
+        rate REAL NOT NULL,
+        month TEXT
+    )
+''')
 
 # Read the file - skip to row 8 (headers), data starts at row 9
-df = pd.read_csv('data/raw/employment-fetch.csv', skiprows=8, encoding='utf-8')
+df = pd.read_csv('backend/data/raw/employment-fetch.csv', skiprows=8, encoding='utf-8')
 
 # Rename columns
 df.columns = ['Geography', 'Oct_2025', 'Nov_2025', 'Dec_2025', 'Jan_2026', 'Feb_2026']
@@ -36,4 +53,25 @@ print(kitchener.to_string(index=False))
 latest = kitchener['Feb_2026'].values[0]
 print(f"\n📊 Most recent (Feb 2026): {latest}%")
 
-df_new.to_csv('data/processed/employment-cleaned.csv', index=False, encoding='utf-8-sig')
+df_new.to_csv('backend/data/processed/employment-cleaned.csv', index=False, encoding='utf-8-sig')
+
+# Insert each month as a row
+months = [
+    ('2025-10-01', 'October 2025', 'Oct_2025'),
+    ('2025-11-01', 'November 2025', 'Nov_2025'),
+    ('2025-12-01', 'December 2025', 'Dec_2025'),
+    ('2026-01-01', 'January 2026', 'Jan_2026'),
+    ('2026-02-01', 'February 2026', 'Feb_2026'),
+]
+
+for date, month_name, column in months:
+    rate = kitchener[column].values[0]
+    cursor.execute('''
+        INSERT INTO employment (city, date, rate, month)
+        VALUES (?, ?, ?, ?)
+    ''', ('Kitchener-Cambridge-Waterloo', date, rate, month_name))
+
+conn.commit()
+conn.close()
+
+print("✅ Also saved to metrics.db")
