@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 
 # Read the file - skip to row 8 (headers), data starts at row 9
 df = pd.read_csv('data/raw/employment-fetch.csv', skiprows=8, encoding='utf-8')
