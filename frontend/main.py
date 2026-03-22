@@ -2,13 +2,18 @@ from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 import os
 import pandas as pd
+import sqlite3
+import markdown
 
 app = Flask(__name__)
 
-# Connect to overview.db in the same directory as this file
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "overview.db")
-app.config["SQLALCHEMY_ECHO"] = True
+# Project structure setup
+FRONTEND_DIR = os.path.abspath(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.dirname(FRONTEND_DIR)
+
+# Connect to overview.db in the same directory as this file (frontend/)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(FRONTEND_DIR, "overview.db")
+app.config["SQLALCHEMY_ECHO"] = False
 db = SQLAlchemy(app)
 
 # Model matching the existing 'overview' table
@@ -32,54 +37,50 @@ class employment(db.Model):
         return self.status, self.analysis, self.is_employment
 
 def fetch_employment():
-    employed = []
-    unemployed = []
-    rows = employment.query.all()
-    for row in rows:
-        if row.is_employment == 0:
-            unemployed.append(row)
-        else:
-            employed.append(row)
-    return employed, unemployed
+    try:
+        employed = employment.query.filter_by(is_employment=True).all()
+        unemployed = employment.query.filter_by(is_employment=False).all()
+        return employed, unemployed
+    except Exception as e:
+        print(f"Error fetching employment data: {e}")
+        return [], []
 
-# Ensure tables exist (safe to run even if they already exist)
+# Ensure tables exist
 with app.app_context():
     db.create_all()
 
 
 @app.route("/")
 def index():
-    print("DB PATH:", app.config["SQLALCHEMY_DATABASE_URI"])
-    rows = Overview.query.all()
-    print("ROW COUNT:", len(rows))
-
-    employment, unemployment = fetch_employment()
-
-    return render_template("index.html", rows=rows, unemployment=unemployment, employment=employment)
+    try:
+        rows = Overview.query.all()
+    except Exception as e:
+        print(f"Error querying Overview table: {e}")
+        rows = []
+        
+    employment_data, unemployment_data = fetch_employment()
+    return render_template("index.html", rows=rows, unemployment=unemployment_data, employment=employment_data)
 
 @app.route("/goals")
 def goals():
-    # Setup paths relative to this script's directory (frontend/)
-    # We need to go up to project root, then into backend/data/processed
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    processed_dir = os.path.join(base_dir, "backend", "data", "processed")
+    db_path = os.path.join(PROJECT_ROOT, "backend", "database", "goals.db")
     
-    plans = {}
-    filenames = {
-        "waterloo": "Waterloo_Strategic_Plan_2023-2026.txt",
-        "kitchener": "Kitchener_Strategic_Plan_2023-2026.txt",
-        "cambridge": "Cambridge_Strategic_Plan_2024-2026.txt"
-    }
-    
-    for key, filename in filenames.items():
-        path = os.path.join(processed_dir, filename)
-        if os.path.exists(path):
-            with open(path, 'r', encoding='utf-8') as f:
-                plans[key] = f.read()
-        else:
-            plans[key] = "Data currently unavailable."
+    plans_html = {}
+    if os.path.exists(db_path):
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT area, goals FROM goals")
+            rows = cursor.fetchall()
+            for area, raw_md in rows:
+                # Store as lowercase city name keys
+                plans_html[area.lower()] = markdown.markdown(raw_md, extensions=['fenced_code', 'tables'])
+        except sqlite3.OperationalError as e:
+            print(f"Database error: {e}")
+        finally:
+            conn.close()
             
-    return render_template("goals.html", plans=plans)
+    return render_template("goals.html", plans=plans_html)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
