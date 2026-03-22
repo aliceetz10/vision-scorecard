@@ -6,3 +6,4 @@ flask-sqlalchemy
 selenium>=4.21.0
 selenium-wire>=5.1.0
 webdriver-manager>=4.0.1
+flask-cors
