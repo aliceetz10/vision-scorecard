@@ -1,65 +1,55 @@
+import requests
 import pandas as pd
 import sqlite3
+import os
 
-# Connect to metrics.db
-metrics_db_path = 'backend/database/metrics.db'
-conn = sqlite3.connect(metrics_db_path)
+print("📊 Fetching unemployment data from StatsCan...")
+
+# Create directories if they don't exist
+os.makedirs("backend/data/raw", exist_ok=True)
+os.makedirs("backend/data/processed", exist_ok=True)
+
+# Working URL (downloads latest data)
+url = "https://www150.statcan.gc.ca/t1/tbl1/en/dtl!downloadDbLoadingData-nonTraduit.action?pid=1410045801&latestN=5&startDate=&endDate=&csvLocale=en&selectedMembers=%5B%5B%5D%2C%5B8%5D%2C%5B%5D%2C%5B1%5D%5D&checkedLevels=0D1%2C0D2%2C0D3%2C2D1"
+
+# Download to RAW
+raw_filename = "backend/data/raw/unemployment_fetch.csv"
+response = requests.get(url)
+with open(raw_filename, 'wb') as f:
+    f.write(response.content)
+print(f"✅ Raw file saved: {raw_filename}")
+
+# Read and process
+df = pd.read_csv(raw_filename, encoding='utf-8')
+
+# Filter for Kitchener
+kitchener_data = df[df['GEO'].str.contains('Kitchener', na=False)]
+
+# Create cleaned data
+cleaned_data = []
+for _, row in kitchener_data.iterrows():
+    date = f"{row['REF_DATE']}-01"
+    month_name = pd.to_datetime(row['REF_DATE']).strftime('%B %Y')
+    cleaned_data.append({
+        'city': 'Kitchener-Cambridge-Waterloo',
+        'date': date,
+        'rate': row['VALUE'],
+        'month': month_name
+    })
+
+df_cleaned = pd.DataFrame(cleaned_data)
+
+# Save to processed
+df_cleaned.to_csv("backend/data/processed/unemployment_cleaned.csv", index=False)
+print(f"✅ Processed file saved")
+
+# Update database
+conn = sqlite3.connect('backend/database/metrics.db')
 cursor = conn.cursor()
-
-# Read the file - skip to row 8 (headers), data starts at row 9
-df = pd.read_csv('backend/data/raw/unemployment-fetch.csv', skiprows=8, encoding='utf-8')
-
-# Rename columns
-df.columns = ['Geography', 'Oct_2025', 'Nov_2025', 'Dec_2025', 'Jan_2026', 'Feb_2026']
-
-# Remove empty rows
-df_new = df.dropna(how='all')
-
-
-# Clean the Geography column - remove footnote numbers
-df_new['Geography'] = df_new['Geography'].str.replace(r'\s+\d+$', '', regex=True)
-df_new['Geography'] = df_new['Geography'].str.strip()
-df_new = df_new[df_new['Geography'].str.contains(',', na=False)]
-df_new = df_new[~df_new['Geography'].str.contains('Footnotes|Table|Corrections', na=False, case=False)]
-
-print(df_new.head(70))
-
-# Find Kitchener
-kitchener = df_new[df_new['Geography'].str.contains('Kitchener', na=False)]
-
-# Convert to numbers
-for month in ['Oct_2025', 'Nov_2025', 'Dec_2025', 'Jan_2026', 'Feb_2026']:
-    kitchener[month] = pd.to_numeric(kitchener[month], errors='coerce')
-
-# Display
-print("\n" + "="*60)
-print("KITCHENER-CAMBRIDGE-WATERLOO UNEMPLOYMENT RATE")
-print("="*60)
-print(kitchener.to_string(index=False))
-
-# Also show the most recent value
-latest = kitchener['Feb_2026'].values[0]
-print(f"\n📊 Most recent (Feb 2026): {latest}%")
-
-df_new.to_csv('backend/data/processed/unemployment-cleaned.csv', index=False, encoding='utf-8-sig')
-
-# Insert each month as a row
-months = [
-    ('2025-10-01', 'October 2025', 'Oct_2025'),
-    ('2025-11-01', 'November 2025', 'Nov_2025'),
-    ('2025-12-01', 'December 2025', 'Dec_2025'),
-    ('2026-01-01', 'January 2026', 'Jan_2026'),
-    ('2026-02-01', 'February 2026', 'Feb_2026'),
-]
-
-for date, month_name, column in months:
-    rate = kitchener[column].values[0]
-    cursor.execute('''
-        INSERT INTO unemployment (city, date, rate, month)
-        VALUES (?, ?, ?, ?)
-    ''', ('Kitchener-Cambridge-Waterloo', date, rate, month_name))
-
+cursor.execute("DELETE FROM unemployment")
+for _, row in df_cleaned.iterrows():
+    cursor.execute('INSERT INTO unemployment (city, date, rate, month) VALUES (?, ?, ?, ?)',
+                   (row['city'], row['date'], row['rate'], row['month']))
 conn.commit()
 conn.close()
-
-print("✅ Also saved to metrics.db")
+print(f"✅ Saved {len(df_cleaned)} records to metrics.db")

@@ -44,6 +44,7 @@ def fetch_employment():
         print(f"❌ Failed to fetch employment: {e}")
         return False
 
+'''
 def fetch_housing():
     """Fetch housing starts data from CMHC"""
     print("🏠 Fetching housing data...")
@@ -115,7 +116,7 @@ def fetch_schools():
     except Exception as e:
         print(f"❌ Failed to fetch schools: {e}")
         return False
-
+'''
 
 # Run AI analysis
 def fetch_goals():
@@ -229,6 +230,7 @@ def run_ai_analysis():
     
     return results
 
+
 def fetch_go_train_data():
     """Fetch GO Train data (custom)"""
     print("🚆 Fetching GO Train data...")
@@ -262,6 +264,7 @@ def fetch_school_summary():
         return "School data not available."
     finally:
         conn.close()
+
 
 
 # Update overview database
@@ -301,29 +304,14 @@ def update_overview_db(ai_results):
     return True
 
 
-# Main execution
 def main():
     """Main orchestration function"""
     print("\n" + "="*50)
     print("🚀 STARTING VISION ONE MILLION SCORECARD UPDATE")
     print("="*50)
     
-    # Step 1: Fetch all data
-    print("\n📥 STEP 1: FETCHING DATA")
-    fetch_all = [
-        fetch_unemployment(),
-        fetch_employment(),
-        fetch_housing(),
-        fetch_transit(),
-        fetch_hospital(),
-        fetch_go_train(),
-        fetch_ghg(),
-        fetch_schools()
-    ]
-    
-    if not all(fetch_all):
-        print("\n❌ Some data fetches failed")
-        return
+    # Step 1: Skip fetch - data already in database
+    print("\n📥 STEP 1: SKIPPING FETCH (data already in database)")
     
     # Step 2: Run AI analysis
     print("\n🧠 STEP 2: AI ANALYSIS")
@@ -339,6 +327,45 @@ def main():
         print("="*50)
     else:
         print("\n❌ Failed to update overview database")
+
+# # Main execution
+# def main():
+#     """Main orchestration function"""
+#     print("\n" + "="*50)
+#     print("🚀 STARTING VISION ONE MILLION SCORECARD UPDATE")
+#     print("="*50)
+    
+#     # Step 1: Fetch all data
+#     print("\n📥 STEP 1: FETCHING DATA")
+#     fetch_all = [
+#         fetch_unemployment(),
+#         fetch_employment(),
+#         # fetch_housing(),
+#         # fetch_transit(),
+#         # fetch_hospital(),
+#         # fetch_go_train(),
+#         # fetch_ghg(),
+#         # fetch_schools()
+#     ]
+    
+#     if not all(fetch_all):
+#         print("\n❌ Some data fetches failed")
+#         return
+    
+#     # Step 2: Run AI analysis
+#     print("\n🧠 STEP 2: AI ANALYSIS")
+#     ai_results = run_ai_analysis()
+    
+#     # Step 3: Update overview database
+#     print("\n💾 STEP 3: UPDATING DATABASE")
+#     update_success = update_overview_db(ai_results)
+    
+#     if update_success:
+#         print("\n" + "="*50)
+#         print("🎉 UPDATE COMPLETED SUCCESSFULLY!")
+#         print("="*50)
+#     else:
+#         print("\n❌ Failed to update overview database")
 
 if __name__ == "__main__":
     main()
