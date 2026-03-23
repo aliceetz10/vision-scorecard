@@ -11,12 +11,12 @@
 </head>
 
 <body>
-    <header class="bg-white">
+    <header class="bg-white sticky top-0 z-50 border-b border-gray-100">
         <nav aria-label="Global" class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
             <div class="flex lg:flex-1">
                 <a href="/" class="-m-1.5 p-1.5">
                     <span class="sr-only">Allure</span>
-                    <h1 class="text-2xl font-semibold leading-6 text-gray-900">Allure</h1>
+                    <h1 class="text-3xl font-bold tracking-tight text-[#58598A]">Allure</h1>
                 </a>
             </div>
             <div class="flex lg:hidden">
@@ -32,9 +32,14 @@
             </div>
             <el-popover-group class="hidden lg:flex lg:gap-x-12">
 
-                <a href="/" class="text-sm/6 font-semibold text-gray-900">Overview</a>
-                <a href="/" class="text-sm/6 font-semibold text-gray-900">Fields</a>
-                <a href="/goals" class="text-sm/6 font-semibold text-gray-900">Goals</a>
+                <a href="/#regional-overview"
+                    class="text-sm/6 font-bold text-[#202E52] hover:text-[#5E99A0]">Overview</a>
+                <a href="/#individual-factors"
+                    class="text-sm/6 font-bold text-[#202E52] hover:text-[#5E99A0]">Individual Factors</a>
+                <a href="/goals" class="text-sm/6 font-bold text-[#202E52] hover:text-[#5E99A0]">Goals</a>
+                <a href="/goals#scorecard-legend"
+                    class="text-sm/6 font-bold text-[#202E52] hover:text-[#5E99A0]">Scorecard</a>
+                <a href="/references" class="text-sm/6 font-bold text-[#202E52] hover:text-[#5E99A0]">References</a>
             </el-popover-group>
         </nav>
 
@@ -63,12 +68,15 @@
                         <div class="mt-6 flow-root">
                             <div class="-my-6 divide-y divide-gray-500/10">
                                 <div class="space-y-2 py-6">
-                                    <a href="/"
+                                    <a href="/#regional-overview"
                                         class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">Overview</a>
-                                    <a href="/"
-                                        class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">Fields</a>
+                                    <a href="/#individual-factors"
+                                        class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">Individual
+                                        Factors</a>
                                     <a href="/goals"
                                         class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">Goals</a>
+                                    <a href="/references"
+                                        class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">References</a>
                                 </div>
                             </div>
                         </div>
