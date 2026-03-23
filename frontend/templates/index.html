@@ -18,7 +18,7 @@
 
             {% if overview %}
             {% for entry in overview %}
-            <div class="bg-[#F4F6FB] border-2 border-[#D0D5E5] rounded-3xl p-10 shadow-sm">
+            <div class="bg-[#F4F6FB] border-2 border-[#D0D5E5] rounded-3xl p-10 shadow-sm mb-6">
                 <div class="prose prose-slate max-w-none text-[#202E52]">
                     <div class="leading-relaxed">
                         {{ entry.analysis | markdown | safe }}

@@ -304,6 +304,22 @@ def update_overview_db(ai_results):
     return True
 
 
+def run_overview_analysis():
+    """Run the frontend overview AI analysis script"""
+    print("\n🔎 RUNNING REGIONAL OVERVIEW ANALYSIS...")
+    overview_script = os.path.join(FRONTEND_DIR, 'overview.py')
+    if not os.path.exists(overview_script):
+        print(f"❌ overview.py not found at {overview_script}")
+        return False
+    try:
+        subprocess.run(['python', overview_script], cwd=FRONTEND_DIR, check=True)
+        print("✅ Regional overview analysis complete")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to run overview analysis: {e}")
+        return False
+
+
 def main():
     """Main orchestration function"""
     print("\n" + "="*50)
@@ -320,6 +336,10 @@ def main():
     # Step 3: Update overview database
     print("\n💾 STEP 3: UPDATING DATABASE")
     update_success = update_overview_db(ai_results)
+    
+    # Step 4: Run regional overview analysis
+    print("\n📝 STEP 4: REGIONAL OVERVIEW ANALYSIS")
+    run_overview_analysis()
     
     if update_success:
         print("\n" + "="*50)

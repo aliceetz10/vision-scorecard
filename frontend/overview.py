@@ -174,8 +174,8 @@ else:
     conn = sqlite3.connect(OVERVIEW_DB_PATH)
     cursor = conn.cursor()
 
-    # Clear previous data
-    cursor.execute("DELETE FROM overview")
+    # Clear previous overview data
+    cursor.execute("DELETE FROM overview WHERE field = 'Regional Vision Scorecard'")
 
     # Insert overview
     cursor.execute("""
