@@ -22,57 +22,119 @@
         {% endfor %}
     </div>
 
-    <!-- Employment Factor Section -->
+    <!-- Individual Factors Section -->
     <section class="mt-10">
-        <div class="sm:flex sm:items-center mb-4">
+        <div class="sm:flex sm:items-center mb-6">
             <div class="sm:flex-auto">
                 <h2 class="text-xl font-semibold text-gray-900">Individual Factors</h2>
-                <p class="mt-1 text-sm text-gray-500">Latest factors affecting waterloo.</p>
+                <p class="mt-1 text-sm text-gray-500">Key regional metrics and AI-driven analysis.</p>
             </div>
         </div>
 
-        <!-- Single clickable Employment card -->
-        <div class="field-card employment-summary-card" id="employment-card">
-            <div class="employment-card-inner">
-                <span class="employment-card-icon">💼</span>
-                <h3>Employment</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Employment Card -->
+            <div class="factor-summary-card" id="employment-card">
+                <div class="factor-card-inner">
+                    <span class="factor-card-icon">💼</span>
+                    <h3>Employment</h3>
+                </div>
+            </div>
+
+            <!-- Housing Card -->
+            <div class="factor-summary-card" id="housing-card">
+                <div class="factor-card-inner">
+                    <span class="factor-card-icon">🏠</span>
+                    <h3>Housing</h3>
+                </div>
+            </div>
+
+            <!-- Transit Card -->
+            <div class="factor-summary-card" id="transit-card">
+                <div class="factor-card-inner">
+                    <span class="factor-card-icon">🚌</span>
+                    <h3>Transport</h3>
+                </div>
+            </div>
+
+            <!-- Healthcare Card -->
+            <div class="factor-summary-card" id="healthcare-card">
+                <div class="factor-card-inner">
+                    <span class="factor-card-icon">🏥</span>
+                    <h3>Healthcare</h3>
+                </div>
+            </div>
+
+            <!-- Placemaking Card -->
+            <div class="factor-summary-card" id="placemaking-card">
+                <div class="factor-card-inner">
+                    <span class="factor-card-icon">🌳</span>
+                    <h3>Placemaking</h3>
+                </div>
             </div>
         </div>
 
         <!-- Hidden data for JS -->
-        <script id="employment-data" type="application/json">
-                {
-                    "employment": [{% for row in employment %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "type": "employment"}{% if not loop.last %},{% endif %}{% endfor %}],
-                    "unemployment": [{% for row in unemployment %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "type": "unemployment"}{% if not loop.last %},{% endif %}{% endfor %}]
+        <script id="factor-data" type="application/json">
+            {
+                "employment": {
+                    "title": "💼 Employment & Unemployment Analysis",
+                    "rows": [
+                        {% for row in employment %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "employment"}{% if not loop.last %},{% endif %}{% endfor %},
+                        {% for row in unemployment %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "unemployment"}{% if not loop.last %},{% endif %}{% endfor %}
+                    ]
+                },
+                "housing": {
+                    "title": "🏠 Housing Analysis",
+                    "rows": [
+                        {% for row in housing %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "housing"}{% if not loop.last %},{% endif %}{% endfor %}
+                    ]
+                },
+                "transit": {
+                    "title": "🚌 Transport & Connectivity Analysis",
+                    "rows": [
+                        {% for row in transit %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "transit"}{% if not loop.last %},{% endif %}{% endfor %},
+                        {% for row in go_train %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "go_train"}{% if not loop.last %},{% endif %}{% endfor %}
+                    ]
+                },
+                "healthcare": {
+                    "title": "🏥 Healthcare Analysis",
+                    "rows": [
+                        {% for row in healthcare %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "healthcare"}{% if not loop.last %},{% endif %}{% endfor %}
+                    ]
+                },
+                "placemaking": {
+                    "title": "🌳 Placemaking & Environment Analysis",
+                    "rows": [
+                        {% for row in schools %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "school"}{% if not loop.last %},{% endif %}{% endfor %},
+                        {% for row in ghg %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "ghg"}{% if not loop.last %},{% endif %}{% endfor %}
+                    ]
                 }
-            </script>
+            }
+        </script>
     </section>
 </main>
 
 
-<!-- Overlay Modal (generic) -->
+<!-- Generic Card Modal (used for Housing, Healthcare, etc. in 'rows') -->
 <div id="card-overlay" role="dialog" aria-modal="true">
     <div id="card-modal">
         <button id="close-btn" aria-label="Close">✕</button>
         <h2 id="modal-title"></h2>
-        <p id="modal-analysis"></p>
+        <div id="modal-analysis" class="prose prose-indigo max-w-none text-sm text-gray-700 leading-relaxed"></div>
     </div>
 </div>
 
-<!-- Employment Modal -->
-<div id="employment-overlay" role="dialog" aria-modal="true">
-    <div id="employment-modal">
-        <button id="employment-close-btn" aria-label="Close">✕</button>
-        <h2 id="employment-modal-title">💼 Employment Analysis</h2>
-        <div id="employment-modal-body"></div>
-        <br>
-        <h2 id="employment-modal-title">📉 Unemployment Analysis</h2>
-        <div id="unemployment-modal-body"></div>
+<!-- Factor Modal (used for Employment and Housing with status badges) -->
+<div id="factor-overlay" role="dialog" aria-modal="true">
+    <div id="factor-modal">
+        <button id="factor-close-btn" aria-label="Close">✕</button>
+        <h2 id="factor-modal-title" class="text-xl font-bold text-indigo-900 mb-6 border-b pb-2"></h2>
+        <div id="factor-modal-body"></div>
     </div>
 </div>
 
 <script>
-    // ── Generic card modal ──
+    // ── Generic card modal for top-level overview cards ──
     const overlay = document.getElementById('card-overlay');
     const titleEl = document.getElementById('modal-title');
     const analysisEl = document.getElementById('modal-analysis');
@@ -90,8 +152,7 @@
         document.body.style.overflow = '';
     }
 
-    // Attach generic modal to all field-cards EXCEPT the employment summary card
-    document.querySelectorAll('.field-card:not(#employment-card)').forEach(card => {
+    document.querySelectorAll('.field-card').forEach(card => {
         card.addEventListener('click', () => {
             openCard(card.dataset.field, card.dataset.analysis);
         });
@@ -100,57 +161,84 @@
     closeBtn.addEventListener('click', closeCard);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeCard(); });
 
-    // ── Employment modal ──
-    const empOverlay = document.getElementById('employment-overlay');
-    const empBody = document.getElementById('employment-modal-body');
-    const empCloseBtn = document.getElementById('employment-close-btn');
-    const empData = JSON.parse(document.getElementById('employment-data').textContent);
+    // ── Factor modal with status badges (Employment, Housing, Transit) ──
+    const factorOverlay = document.getElementById('factor-overlay');
+    const factorTitle = document.getElementById('factor-modal-title');
+    const factorBody = document.getElementById('factor-modal-body');
+    const factorCloseBtn = document.getElementById('factor-close-btn');
+    const allFactorData = JSON.parse(document.getElementById('factor-data').textContent);
 
-    const unempBody = document.getElementById('unemployment-modal-body');
+    function getIcon(kind) {
+        if (kind === 'employment') return '💼 ';
+        if (kind === 'unemployment') return '📉 ';
+        if (kind === 'housing') return '🏠 ';
+        if (kind === 'transit') return '🚌 ';
+        if (kind === 'go_train') return '🚆 ';
+        if (kind === 'healthcare') return '🏥 ';
+        if (kind === 'school') return '🏫 ';
+        if (kind === 'ghg') return '🍃 ';
+        return '🔹 ';
+    }
 
-    function renderRows(rows, container, kind) {
+    function getStatusClass(status) {
+        if (!status) return 'status-no-assessment';
+        const s = status.toUpperCase();
+        if (s.includes('ACHIEVED')) return 'status-achieved';
+        if (s.includes('ON TRACK')) return 'status-on-track';
+        if (s.includes('IN PROGRESS')) return 'status-in-progress';
+        if (s.includes('NEEDS ATTENTION')) return 'status-needs-attention';
+        return 'status-no-assessment';
+    }
+
+    function renderFactorRows(rows, container) {
         container.innerHTML = '';
-        if (rows.length === 0) {
-            container.innerHTML = '<p class="emp-empty">No data available.</p>';
+        if (!rows || rows.length === 0) {
+            container.innerHTML = '<p class="text-gray-500 italic">No detailed analysis available yet.</p>';
             return;
         }
         rows.forEach(row => {
             const block = document.createElement('div');
-            block.className = 'emp-analysis-block';
-
-            const text = document.createElement('p');
-            text.className = 'emp-analysis-text';
-            text.textContent = row.analysis || '—';
+            block.className = 'factor-analysis-block bg-slate-50 p-5 rounded-xl border border-slate-100 mb-4';
 
             const badge = document.createElement('span');
-            badge.className = 'emp-status-badge emp-status-badge--' + kind;
-            badge.textContent = (kind === 'employment' ? '💼 ' : '📉 ') + row.status;
+            badge.className = 'emp-status-badge mb-3 block w-fit ' + getStatusClass(row.status);
+            badge.textContent = getIcon(row.kind) + row.status;
 
-            block.appendChild(text);
+            const text = document.createElement('p');
+            text.className = 'text-sm text-gray-700 leading-relaxed';
+            text.textContent = row.analysis || '—';
+
             block.appendChild(badge);
+            block.appendChild(text);
             container.appendChild(block);
         });
     }
 
-    function openEmploymentModal() {
-        renderRows(empData.employment, empBody, 'employment');
-        renderRows(empData.unemployment, unempBody, 'unemployment');
-        empOverlay.classList.add('open');
+    function openFactorModal(type) {
+        const data = allFactorData[type];
+        factorTitle.textContent = data.title;
+        renderFactorRows(data.rows, factorBody);
+        factorOverlay.classList.add('open');
         document.body.style.overflow = 'hidden';
     }
 
-    function closeEmploymentModal() {
-        empOverlay.classList.remove('open');
+    function closeFactorModal() {
+        factorOverlay.classList.remove('open');
         document.body.style.overflow = '';
     }
 
-    document.getElementById('employment-card').addEventListener('click', openEmploymentModal);
-    empCloseBtn.addEventListener('click', closeEmploymentModal);
-    empOverlay.addEventListener('click', (e) => { if (e.target === empOverlay) closeEmploymentModal(); });
+    document.getElementById('employment-card').addEventListener('click', () => openFactorModal('employment'));
+    document.getElementById('housing-card').addEventListener('click', () => openFactorModal('housing'));
+    document.getElementById('transit-card').addEventListener('click', () => openFactorModal('transit'));
+    document.getElementById('healthcare-card').addEventListener('click', () => openFactorModal('healthcare'));
+    document.getElementById('placemaking-card').addEventListener('click', () => openFactorModal('placemaking'));
+    
+    factorCloseBtn.addEventListener('click', closeFactorModal);
+    factorOverlay.addEventListener('click', (e) => { if (e.target === factorOverlay) closeFactorModal(); });
 
-    // Close on Escape key (both modals)
+    // Close on Escape key
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') { closeCard(); closeEmploymentModal(); }
+        if (e.key === 'Escape') { closeCard(); closeFactorModal(); }
     });
 </script>
 {% endblock %}

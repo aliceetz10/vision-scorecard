@@ -16,15 +16,12 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(FRONTEND_DIR
 app.config["SQLALCHEMY_ECHO"] = False
 db = SQLAlchemy(app)
 
-# Model matching the existing 'overview' table
+# Models
 class Overview(db.Model):
     __tablename__ = "overview"
     id = db.Column(db.Integer, primary_key=True)
     field = db.Column(db.Text, nullable=True)
     analysis = db.Column(db.Text, nullable=True)
-
-    def __repr__(self):
-        return self.field, self.analysis
 
 class employment(db.Model):
     __tablename__ = "employment"
@@ -33,9 +30,33 @@ class employment(db.Model):
     analysis = db.Column(db.Text, nullable=True)
     is_employment = db.Column(db.Boolean, nullable=True)
 
-    def __repr__(self):
-        return self.status, self.analysis, self.is_employment
+class Housing(db.Model):
+    __tablename__ = "housing"
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.Text, nullable=True)
+    analysis = db.Column(db.Text, nullable=True)
 
+class Transit(db.Model):
+    __tablename__ = "transit"
+    id = db.Column(db.Integer, primary_key=True)
+    is_transit = db.Column(db.Boolean, nullable=True)
+    status = db.Column(db.Text, nullable=True)
+    analysis = db.Column(db.Text, nullable=True)
+
+class Healthcare(db.Model):
+    __tablename__ = "healthcare"
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.Text, nullable=True)
+    analysis = db.Column(db.Text, nullable=True)
+
+class Placemaking(db.Model):
+    __tablename__ = "placemaking"
+    id = db.Column(db.Integer, primary_key=True)
+    is_school = db.Column(db.Boolean, nullable=True)
+    status = db.Column(db.Text, nullable=True)
+    analysis = db.Column(db.Text, nullable=True)
+
+# Fetch Helpers
 def fetch_employment():
     try:
         employed = employment.query.filter_by(is_employment=True).all()
@@ -43,6 +64,38 @@ def fetch_employment():
         return employed, unemployed
     except Exception as e:
         print(f"Error fetching employment data: {e}")
+        return [], []
+
+def fetch_housing():
+    try:
+        return Housing.query.all()
+    except Exception as e:
+        print(f"Error fetching housing data: {e}")
+        return []
+
+def fetch_transit():
+    try:
+        grt = Transit.query.filter_by(is_transit=True).all()
+        go = Transit.query.filter_by(is_transit=False).all()
+        return grt, go
+    except Exception as e:
+        print(f"Error fetching transit data: {e}")
+        return [], []
+
+def fetch_healthcare():
+    try:
+        return Healthcare.query.all()
+    except Exception as e:
+        print(f"Error fetching healthcare data: {e}")
+        return []
+
+def fetch_placemaking():
+    try:
+        schools = Placemaking.query.filter_by(is_school=True).all()
+        ghg = Placemaking.query.filter_by(is_school=False).all()
+        return schools, ghg
+    except Exception as e:
+        print(f"Error fetching placemaking data: {e}")
         return [], []
 
 # Ensure tables exist
@@ -58,8 +111,22 @@ def index():
         print(f"Error querying Overview table: {e}")
         rows = []
         
-    employment_data, unemployment_data = fetch_employment()
-    return render_template("index.html", rows=rows, unemployment=unemployment_data, employment=employment_data)
+    emp_data, unemp_data = fetch_employment()
+    housing_data = fetch_housing()
+    transit_data, go_data = fetch_transit()
+    healthcare_data = fetch_healthcare()
+    school_data, ghg_data = fetch_placemaking()
+    
+    return render_template("index.html", 
+                           rows=rows, 
+                           unemployment=unemp_data, 
+                           employment=emp_data,
+                           housing=housing_data,
+                           transit=transit_data,
+                           go_train=go_data,
+                           healthcare=healthcare_data,
+                           schools=school_data,
+                           ghg=ghg_data)
 
 @app.route("/goals")
 def goals():
@@ -73,7 +140,6 @@ def goals():
             cursor.execute("SELECT area, goals FROM goals")
             rows = cursor.fetchall()
             for area, raw_md in rows:
-                # Store as lowercase city name keys
                 plans_html[area.lower()] = markdown.markdown(raw_md, extensions=['fenced_code', 'tables'])
         except sqlite3.OperationalError as e:
             print(f"Database error: {e}")
