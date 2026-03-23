@@ -23,14 +23,14 @@
 
 .field-card:hover {
     transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 6px 24px rgba(99, 102, 241, 0.13);
-    background: #f5f3ff;
+    box-shadow: 0 6px 24px rgba(32, 46, 82, 0.15);
+    background: #f8f9ff;
 }
 
 .field-card h3 {
     font-size: 1rem;
     font-weight: 600;
-    color: #4338ca;
+    color: #202E52;
     text-align: center;
     margin: 0;
 }
@@ -68,7 +68,7 @@
 #card-modal h2 {
     font-size: 1.3rem;
     font-weight: 700;
-    color: #3730a3;
+    color: #202E52;
     margin: 0 0 1rem 0;
     padding-right: 2rem;
 }
@@ -130,42 +130,42 @@
 .factor-summary-card {
     background: #fff;
     border: 1px solid #e5e7eb;
-    border-radius: 1rem;
-    padding: 1.5rem 1.25rem;
+    border-radius: 1.25rem;
+    padding: 1.25rem 2rem;
     cursor: pointer;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     display: flex;
     align-items: center;
-    justify-content: center;
-    min-height: 110px;
-    background: linear-gradient(135deg, #f0f4ff 0%, #eef2ff 100%);
-    border-color: #c7d2fe;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f3ff 100%);
+    border-color: #d1d9e6;
 }
 
 .factor-summary-card:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 6px 24px rgba(99, 102, 241, 0.13);
-    background: #f5f3ff;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(32, 46, 82, 0.1);
+    background: #fbfbff;
+    border-color: #202E52;
 }
 
 .factor-card-inner {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 0.35rem;
+    gap: 1.5rem;
+    width: 100%;
 }
 
 .factor-card-icon {
-    font-size: 2rem;
+    font-size: 1.75rem;
     line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
 .factor-card-inner h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #4338ca;
-    text-align: center;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #202E52;
     margin: 0;
 }
 
@@ -234,9 +234,9 @@
     background-color: #C7C7CC; /* Default */
 }
 
-.status-achieved { background-color: #5AC8FA !important; }
-.status-on-track { background-color: #7EB34C !important; }
-.status-in-progress { background-color: #F5B933 !important; }
-.status-needs-attention { background-color: #B82B21 !important; }
-.status-no-assessment { background-color: #C7C7CC !important; }
+.status-achieved { background-color: #5E99A0 !important; }
+.status-on-track { background-color: #58598A !important; }
+.status-in-progress { background-color: #D5A98D !important; }
+.status-needs-attention { background-color: #885771 !important; }
+.status-no-assessment { background-color: #614040 !important; }
 

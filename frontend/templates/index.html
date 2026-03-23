@@ -6,112 +6,126 @@
 
 
 <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-2xl font-semibold leading-6 text-gray-900">Project Overview</h1>
-            <p class="mt-2 text-sm text-gray-700">Click a field card to see its full analysis.</p>
-        </div>
+    <div id="regional-overview">
+        <section class="mb-16">
+            <div class="sm:flex sm:items-center mb-8">
+                <div class="sm:flex-auto">
+                    <h1 class="text-3xl font-bold tracking-tight text-[#5E99A0]">Regional Strategy Hub</h1>
+                    <p class="mt-2 text-lg text-gray-600 font-medium">Latest AI-generated regional vision analysis and
+                        strategic recommendations for the KWC area.</p>
+                </div>
+            </div>
+
+            {% if overview %}
+            {% for entry in overview %}
+            <div class="bg-[#F4F6FB] border-2 border-[#D0D5E5] rounded-3xl p-10 shadow-sm">
+                <div class="prose prose-slate max-w-none text-[#202E52]">
+                    <div class="leading-relaxed">
+                        {{ entry.analysis | markdown | safe }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-8 text-center">
+                <p class="text-gray-500 italic">No overview data available. Please run the analysis script.</p>
+            </div>
+            {% endif %}
+        </section>
     </div>
 
-    <!-- Card Grid -->
-    <div id="card-grid">
-        {% for row in rows %}
-        <div class="field-card" data-field="{{ row.field | e }}" data-analysis="{{ row.analysis | e }}">
-            <h3>{{ row.field }}</h3>
-        </div>
-        {% endfor %}
-    </div>
-
-    <!-- Individual Factors Section -->
-    <section class="mt-10">
-        <div class="sm:flex sm:items-center mb-6">
-            <div class="sm:flex-auto">
-                <h2 class="text-xl font-semibold text-gray-900">Individual Factors</h2>
-                <p class="mt-1 text-sm text-gray-500">Key regional metrics and AI-driven analysis.</p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <!-- Employment Card -->
-            <div class="factor-summary-card" id="employment-card">
-                <div class="factor-card-inner">
-                    <span class="factor-card-icon">💼</span>
-                    <h3>Employment</h3>
+    <div id="individual-factors">
+        <!-- Individual Factors Section -->
+        <section class="mt-10">
+            <div class="sm:flex sm:items-center mb-6">
+                <div class="sm:flex-auto">
+                    <h1 class="text-3xl font-bold tracking-tight text-[#5E99A0]">Individual Factors</h1>
+                    <p class="mt-1 text-sm text-gray-500">Key regional metrics and AI-driven analysis.</p>
                 </div>
             </div>
 
-            <!-- Housing Card -->
-            <div class="factor-summary-card" id="housing-card">
-                <div class="factor-card-inner">
-                    <span class="factor-card-icon">🏠</span>
-                    <h3>Housing</h3>
+            <div class="grid grid-cols-1 gap-6">
+                <!-- Employment Card -->
+                <div class="factor-summary-card" id="employment-card">
+                    <div class="factor-card-inner">
+                        <span class="factor-card-icon">💼</span>
+                        <h3>Employment</h3>
+                    </div>
+                </div>
+
+                <!-- Housing Card -->
+                <div class="factor-summary-card" id="housing-card">
+                    <div class="factor-card-inner">
+                        <span class="factor-card-icon">🏠</span>
+                        <h3>Housing</h3>
+                    </div>
+                </div>
+
+                <!-- Transit Card -->
+                <div class="factor-summary-card" id="transit-card">
+                    <div class="factor-card-inner">
+                        <span class="factor-card-icon">🚌</span>
+                        <h3>Transport</h3>
+                    </div>
+                </div>
+
+                <!-- Healthcare Card -->
+                <div class="factor-summary-card" id="healthcare-card">
+                    <div class="factor-card-inner">
+                        <span class="factor-card-icon">🏥</span>
+                        <h3>Healthcare</h3>
+                    </div>
+                </div>
+
+                <!-- Placemaking Card -->
+                <div class="factor-summary-card" id="placemaking-card">
+                    <div class="factor-card-inner">
+                        <span class="factor-card-icon">🌳</span>
+                        <h3>Placemaking</h3>
+                    </div>
                 </div>
             </div>
 
-            <!-- Transit Card -->
-            <div class="factor-summary-card" id="transit-card">
-                <div class="factor-card-inner">
-                    <span class="factor-card-icon">🚌</span>
-                    <h3>Transport</h3>
-                </div>
-            </div>
-
-            <!-- Healthcare Card -->
-            <div class="factor-summary-card" id="healthcare-card">
-                <div class="factor-card-inner">
-                    <span class="factor-card-icon">🏥</span>
-                    <h3>Healthcare</h3>
-                </div>
-            </div>
-
-            <!-- Placemaking Card -->
-            <div class="factor-summary-card" id="placemaking-card">
-                <div class="factor-card-inner">
-                    <span class="factor-card-icon">🌳</span>
-                    <h3>Placemaking</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- Hidden data for JS -->
-        <script id="factor-data" type="application/json">
+            <!-- Hidden data for JS -->
+            <script id="factor-data" type="application/json">
             {
                 "employment": {
                     "title": "💼 Employment & Unemployment Analysis",
                     "rows": [
-                        {% for row in employment %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "employment"}{% if not loop.last %},{% endif %}{% endfor %},
-                        {% for row in unemployment %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "unemployment"}{% if not loop.last %},{% endif %}{% endfor %}
+                        {% for row in employment %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "employment", "source_url": "{{ sources['employment'].url }}"}{% if not loop.last %},{% endif %}{% endfor %},
+                        {% for row in unemployment %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "unemployment", "source_url": "{{ sources['unemployment'].url }}"}{% if not loop.last %},{% endif %}{% endfor %}
                     ]
                 },
                 "housing": {
                     "title": "🏠 Housing Analysis",
                     "rows": [
-                        {% for row in housing %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "housing"}{% if not loop.last %},{% endif %}{% endfor %}
+                        {% for row in housing %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "housing", "source_url": "{{ sources['housing'].url }}"}{% if not loop.last %},{% endif %}{% endfor %}
                     ]
                 },
                 "transit": {
                     "title": "🚌 Transport & Connectivity Analysis",
                     "rows": [
-                        {% for row in transit %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "transit"}{% if not loop.last %},{% endif %}{% endfor %},
-                        {% for row in go_train %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "go_train"}{% if not loop.last %},{% endif %}{% endfor %}
+                        {% for row in transit %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "transit", "source_url": "{{ sources['transit'].url }}"}{% if not loop.last %},{% endif %}{% endfor %},
+                        {% for row in go_train %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "go_train", "source_url": "{{ sources['go_train'].url }}"}{% if not loop.last %},{% endif %}{% endfor %}
                     ]
                 },
                 "healthcare": {
                     "title": "🏥 Healthcare Analysis",
                     "rows": [
-                        {% for row in healthcare %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "healthcare"}{% if not loop.last %},{% endif %}{% endfor %}
+                        {% for row in healthcare %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "healthcare", "source_url": "{{ sources['healthcare'].url }}"}{% if not loop.last %},{% endif %}{% endfor %}
                     ]
                 },
                 "placemaking": {
                     "title": "🌳 Placemaking & Environment Analysis",
                     "rows": [
-                        {% for row in schools %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "school"}{% if not loop.last %},{% endif %}{% endfor %},
-                        {% for row in ghg %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "ghg"}{% if not loop.last %},{% endif %}{% endfor %}
+                        {% for row in schools %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "school", "source_url": "{{ sources['schools'].url }}"}{% if not loop.last %},{% endif %}{% endfor %},
+                        {% for row in ghg %}{"status": {{ row.status | tojson }}, "analysis": {{ row.analysis | tojson }}, "kind": "ghg", "source_url": "{{ sources['ghg'].url }}"}{% if not loop.last %},{% endif %}{% endfor %}
                     ]
                 }
             }
         </script>
-    </section>
+        </section>
+    </div>
 </main>
 
 
@@ -128,7 +142,7 @@
 <div id="factor-overlay" role="dialog" aria-modal="true">
     <div id="factor-modal">
         <button id="factor-close-btn" aria-label="Close">✕</button>
-        <h2 id="factor-modal-title" class="text-xl font-bold text-indigo-900 mb-6 border-b pb-2"></h2>
+        <h2 id="factor-modal-title" class="text-xl font-bold text-[#202E52] mb-6 border-b pb-2"></h2>
         <div id="factor-modal-body"></div>
     </div>
 </div>
@@ -140,9 +154,9 @@
     const analysisEl = document.getElementById('modal-analysis');
     const closeBtn = document.getElementById('close-btn');
 
-    function openCard(field, analysis) {
+    function openCard(field, htmlContent) {
         titleEl.textContent = field;
-        analysisEl.textContent = analysis;
+        analysisEl.innerHTML = htmlContent;
         overlay.classList.add('open');
         document.body.style.overflow = 'hidden';
     }
@@ -151,12 +165,6 @@
         overlay.classList.remove('open');
         document.body.style.overflow = '';
     }
-
-    document.querySelectorAll('.field-card').forEach(card => {
-        card.addEventListener('click', () => {
-            openCard(card.dataset.field, card.dataset.analysis);
-        });
-    });
 
     closeBtn.addEventListener('click', closeCard);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeCard(); });
@@ -198,7 +206,11 @@
         }
         rows.forEach(row => {
             const block = document.createElement('div');
-            block.className = 'factor-analysis-block bg-slate-50 p-5 rounded-xl border border-slate-100 mb-4';
+            block.className = 'factor-analysis-block bg-slate-50 p-5 rounded-xl border border-slate-100 mb-4 cursor-pointer hover:bg-slate-100 transition-colors duration-200';
+            block.title = 'Click to view the scorecard legend';
+            block.addEventListener('click', () => {
+                window.location.href = '/goals#scorecard-legend';
+            });
 
             const badge = document.createElement('span');
             badge.className = 'emp-status-badge mb-3 block w-fit ' + getStatusClass(row.status);
@@ -208,8 +220,23 @@
             text.className = 'text-sm text-gray-700 leading-relaxed';
             text.textContent = row.analysis || '—';
 
+            const footer = document.createElement('div');
+            footer.className = 'mt-4 pt-4 border-t border-slate-100 flex justify-end';
+
+            const sourceLink = document.createElement('a');
+            sourceLink.href = row.source_url;
+            sourceLink.target = '_blank';
+            sourceLink.className = 'text-xs font-bold text-[#202E52] hover:underline bg-[#F4F6FB] px-4 py-2 rounded-lg border border-[#D0D5E5] flex items-center gap-2';
+            sourceLink.innerHTML = '<span>View Original Data</span> <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>';
+            sourceLink.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
+            footer.appendChild(sourceLink);
+
             block.appendChild(badge);
             block.appendChild(text);
+            block.appendChild(footer);
             container.appendChild(block);
         });
     }
@@ -232,7 +259,7 @@
     document.getElementById('transit-card').addEventListener('click', () => openFactorModal('transit'));
     document.getElementById('healthcare-card').addEventListener('click', () => openFactorModal('healthcare'));
     document.getElementById('placemaking-card').addEventListener('click', () => openFactorModal('placemaking'));
-    
+
     factorCloseBtn.addEventListener('click', closeFactorModal);
     factorOverlay.addEventListener('click', (e) => { if (e.target === factorOverlay) closeFactorModal(); });
 
